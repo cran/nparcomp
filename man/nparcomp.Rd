@@ -13,35 +13,34 @@ The function 'nparcomp' also computes one-sided and two-sided confidence interva
 
 \usage{
 nparcomp(formula, data,
- type = c("Tukey", "Dunnett", "Sequen", "Williams", "Changepoint", "AVE", "McDermott", "Marcus"),
- control = NULL, conflevel = 0.95, alternative = c("two.sided", "lower", "greater"),
- rounds = 3, Correlation = FALSE, asy.method = c("logit", "probit", "normal", "mult.t"),
- plot.simci = TRUE, info = TRUE)
+ type = c("UserDefined", "Tukey", "Dunnett", "Sequen", "Williams", "Changepoint",
+ "AVE", "McDermott", "Marcus", "UmbrellaWilliams"), control = NULL, conflevel = 0.95,
+ alternative = c("two.sided", "lower", "greater"), rounds = 3, correlation = FALSE,
+ asy.method = c("logit", "probit", "normal", "mult.t"), plot.simci = TRUE, info = TRUE,
+ contrast.matrix = NULL)
 }
 
 \arguments{
  \item{formula}{  \code{formula}  A two-sided 'formula' specifying a numeric response variable
           and a factor with more than two levels. If the factor contains less than 3 levels, an error message will be returned }
   \item{data}{  \code{data} A dataframe containing the variables specified in formula}
-  \item{type}{  \code{type} Character string defining the type of contrast. It should be one of
-  "Tukey", "Dunnett", "Sequen", "Williams", "Changepoint", "AVE", "McDermott", "Marcus" }
+  \item{type}{  \code{type} Character string defining the type of contrast. It should be one of "Tukey", "Dunnett", "Sequen", "Williams", "Changepoint", "AVE", "McDermott", "Marcus", "UmbrellaWilliams" }
   \item{control}{  \code{control} Character string defining the control group in Dunnett comparisons. By default it is the first group by
  lexicographical ordering  }
  \item{conflevel}{ \code{conflevel} The confidence level for the 1 - conflevel confidence intervals. By default it is 0.05 }
  \item{alternative}{ \code{alternative} Character string defining the alternative hypothesis, one
           of "two.sided", "lower" or "greater" }
   \item{rounds}{ Number of rounds for the  numeric values of the output. By default it is rounds=3 }
-  \item{Correlation}{  \code{Correlation} A logical whether the estimated correlation matrix and covariance matrix should be printed  }
+  \item{correlation}{  \code{correlation} A logical whether the estimated correlation matrix and covariance matrix should be printed  }
   \item{asy.method}{  \code{asy.method} character string defining the asymptotic approximation method, one
           of "logit", for using the logit transformation function, "probit", for using the probit transformation function, "normal",
           for using the multivariate normal distribution or "mult.t" for
           using a multivariate t-distribution with a Satterthwaite Approximation   }
   \item{plot.simci}{  \code{plot.simci} A logical indicating whether you want a plot of the confidence intervals }
   \item{info}{ \code{info} A logical whether you want a brief overview with informations about the output  }
+  \item{contrast.matrix}{optional, a user defined contrast matrix, ignored if...}
 }
-\details{
 
-}
 \value{
    \item{weight.matrix }{The weight matrix for the choosen nonparametric relative contrast effect}
    \item{Data.Info }{List of samples and sample sizes }
@@ -90,7 +89,10 @@ nparcomp(weight ~dosage, data=liver, asy.method = "probit",
 
 data(colu)
 
-  # Tukey comparison- one sided(lower)
+
+\dontrun{
+
+ # Tukey comparison- one sided(lower)
 
 nparcomp(corpora ~dose, data=colu, asy.method = "mult.t",
  type = "Tukey",alternative = "lower", plot.simci = TRUE, info = TRUE)
@@ -104,6 +106,8 @@ nparcomp(corpora ~dose, data=colu, asy.method = "mult.t",
 
 nparcomp(corpora ~dose, data=colu, asy.method = "mult.t",
  type = "Tukey",alternative = "lower", plot.simci = TRUE, info = TRUE)
+}
+
 
  # Marcus comparison- one sided(greater)
 

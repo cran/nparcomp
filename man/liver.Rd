@@ -20,9 +20,7 @@ After treatment the relative liver weight of the rats was computed.
 \source{
   Brunner, E., Munzel, U. (2002): Nichtparametrische Datenanalyse - Unverbundene Stichproben. Statistik und ihre Anwendungen, Springer, Berlin Heidelberg New York
 }
-\references{
 
-}
 \examples{
 data(liver)
 boxplot(weight~dosage,data=liver)

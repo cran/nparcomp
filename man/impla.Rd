@@ -20,9 +20,7 @@
 \source{
   Brunner, E., Munzel, U. (2002): Nichtparametrische Datenanalyse - Unverbundene Stichproben. Statistik und ihre Anwendungen, Springer, Berlin Heidelberg New York
 }
-\references{
 
-}
 \examples{
 library(nparcomp)
 data(impla)

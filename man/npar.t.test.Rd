@@ -34,9 +34,7 @@ npar.t.test(formula, data, conflevel = 0.05,
   \item{plot.simci}{ \code{plot.simci} A logical indicating whether you want a plot of the confidence interval }
   \item{info}{  \code{info} A logical whether you want a brief overview with informations about the output }
 }
-\details{
 
-}
 \value{
 
   \item{Data.Info }{List of samples and sample sizes }

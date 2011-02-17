@@ -19,8 +19,8 @@ With this package, it is possible to compute nonparametric simultaneous
 \tabular{ll}{
 Package: \tab nparcomp\cr
 Type: \tab Package\cr
-Version: \tab 1.0-0\cr
-Date: \tab 2008-05-04\cr
+Version: \tab 1.0-1\cr
+Date: \tab 2011-02-17\cr
 License: \tab GPL\cr
 }
 
@@ -82,6 +82,9 @@ nparcomp(weight ~dosage, data=liver, asy.method = "probit",
 
 data(colu)
 
+
+\dontrun{
+
   # Tukey comparison - one sided(lower)
 
 nparcomp(corpora ~dose, data=colu, asy.method = "mult.t",
@@ -99,6 +102,7 @@ nparcomp(corpora ~dose, data=colu, asy.method = "mult.t",
 nparcomp(corpora ~dose, data=colu, asy.method = "mult.t",
  type = "Tukey",alternative = "lower", plot.simci = TRUE, info = TRUE)
 
+}
 
   # Marcus comparison- one sided(greater)
 

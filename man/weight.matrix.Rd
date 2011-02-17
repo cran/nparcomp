@@ -7,7 +7,9 @@
 effect is comupted
 }
 \usage{
-weight.matrix(n, type = c("Tukey", "AVE", "Dunnett", "Sequen", "Changepoint", "Marcus", "McDermott", "Williams"), base = 1)
+weight.matrix(n, type = c("UserDefined", "Tukey", "AVE",
+ "Dunnett", "Sequen", "Changepoint", "Marcus", "McDermott",
+ "Williams", "UmbrellaWilliams"), base = 1, contrast.matrix = NULL)
 }
 
 \arguments{
@@ -15,6 +17,7 @@ weight.matrix(n, type = c("Tukey", "AVE", "Dunnett", "Sequen", "Changepoint", "M
   \item{type}{  \code{type} Character string defining the type of contrast. It should be one of
   "Tukey", "Dunnett", "Sequen", "Williams", "Changepoint", "AVE", "McDermott", "Marcus"  }
   \item{base}{  \code{base} Number of the basline values in Dunnett Comparisons. By default it is base = 1 }
+  \item{contrast.matrix}{ optional, a user-defined \code{contrast.matrix} ... }
 }
 \details{
   The function needs the R-function 'contrMat' from the R-package 'multcomp'.
