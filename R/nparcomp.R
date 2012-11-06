@@ -1,56 +1,44 @@
 nparcomp <-
-function(formula, data, type = c("UserDefined", "Tukey", "Dunnett", "Sequen",
-    "Williams", "Changepoint", "AVE", "McDermott", "Marcus","UmbrellaWilliams"),
-    control = NULL, conflevel = 0.95, alternative = c("two.sided",
-        "lower", "greater"), rounds = 3, correlation = FALSE,
-    asy.method = c("logit", "probit", "normal", "mult.t"), plot.simci = TRUE,
-    info = TRUE, contrast.matrix = NULL)
+function (formula, data, type = c("Tukey", "Dunnett",
+    "Sequen", "Williams", "Changepoint", "AVE", "McDermott",
+    "Marcus", "UmbrellaWilliams", "UserDefined"), control = NULL, conf.level = 0.95,
+    alternative = c("two.sided", "less", "greater"), rounds = 3,
+    correlation = FALSE, asy.method = c("logit", "probit", "normal",
+        "mult.t"), plot.simci = FALSE, info = TRUE,contrast.matrix=NULL, weight.matrix=FALSE)
 {
+
+input.list <- list(formula = formula, data = data, type = type[1],
+                   conf.level=conf.level, alternative=alternative,
+                   asy.method=asy.method, plot.simci=plot.simci,
+                   control=control, info=info, rounds=rounds, 
+                   contrast.matrix=contrast.matrix, correlation=correlation,
+                   weight.matrix=weight.matrix)
+#---------------------Required Packages----------------------------------------#
     mvtnorm <- require(mvtnorm, quietly = TRUE)
     multcomp <- require(multcomp, quietly = TRUE)
-    corr.mat <- function(m, nc) {
-        rho <- matrix(c(0), ncol = nc, nrow = nc)
-        for (i in 1:nc) {
-            for (j in 1:nc) {
-                rho[i, j] <- m[i, j]/sqrt(m[i, i] * m[j, j])
-            }
-        }
-        return(rho)
-    }
-    ssq <- function(x) {
-        sum(x * x)
-    }
-    logit <- function(p) {
-        log(p/(1 - p))
-    }
-    probit <- function(p) {
-        qnorm(p)
-    }
-    expit <- function(G) {
-        exp(G)/(1 + exp(G))
-    }
-    index <- function(char, test) {
-        nc <- length(char)
-        for (i in 1:nc) {
-            if (char[i] == test) {
-                return(i)
-            }
-        }
-    }
 
-    if (conflevel >= 1 || conflevel <= 0) {
-        stop("The confidence level must be between 0 and 1!")
-        if (is.null(alternative)) {
+#----------------------Necessary Functions-------------------------------------#
+ssq <- function(x) {sum(x * x)}
+logit <- function(p){log(p/(1 - p))}
+probit <- function(p){qnorm(p)}
+expit <- function(G){exp(G)/(1 + exp(G))}
+
+conflevel<-conf.level
+#---------------------Containment of given Parameters--------------------------#
+if (conflevel >= 1 || conflevel <= 0) {
+stop("The confidence level must be between 0 and 1!")
+if (is.null(alternative)) {
             stop("Please declare the alternative! (two.sided, lower, greater)")
         }
     }
-    type <- match.arg(type)
-    alternative <- match.arg(alternative)
-    asy.method <- match.arg(asy.method)
-    if (length(formula) != 3) {
-        stop("You can only analyse one-way layouts!")
-    }
-    dat <- model.frame(formula, data)
+    
+type <- match.arg(type)
+alternative <- match.arg(alternative)
+asy.method <- match.arg(asy.method)
+
+#---------------------------Arrange the data-----------------------------------#
+if (length(formula) != 3) {stop("You can only analyse one-way layouts!")}
+    dat <- model.frame(formula, droplevels(data))
     if (ncol(dat) != 2) {
         stop("Specify one response and only one class variable in the formula")
     }
@@ -70,8 +58,10 @@ function(formula, data, type = c("UserDefined", "Tukey", "Dunnett", "Sequen",
         warn <- paste("The factor level", fl[n <= 1], "has got only one observation!")
         stop(warn)
     }
-    ntotal <- sum(n)
+    N <- sum(n)
     a <- length(n)
+    
+#----------------------------Rank the data-------------------------------------#
     tmp <- expand.grid(1:a, 1:a)
     ind <- tmp[[1]] > tmp[[2]]
     vi <- tmp[[2]][ind]
@@ -82,7 +72,7 @@ function(formula, data, type = c("UserDefined", "Tukey", "Dunnett", "Sequen",
     pairRanks <- lapply(1:nc, function(arg) {
         rank(c(samples[[vi[arg]]], samples[[vj[arg]]]))
     })
-    pd <- sapply(1:nc, function(arg) {
+    pd1 <- sapply(1:nc, function(arg) {
         i <- vi[arg]
         j <- vj[arg]
         (sum(pairRanks[[arg]][(n[i] + 1):gn[arg]])/n[j] - (n[j] +
@@ -101,16 +91,14 @@ function(formula, data, type = c("UserDefined", "Tukey", "Dunnett", "Sequen",
         i <- vi[arg]
         j <- vj[arg]
         pr <- pairRanks[[arg]][1:n[i]]
-        dji[[arg]] <<- pr - sum(pr)/n[i] - intRanks[[i]] + (n[i] +
-            1)/2
+        dji[[arg]] <<- pr - sum(pr)/n[i] - intRanks[[i]] + (n[i] + 1)/2
         ssq(dji[[arg]])/(n[j] * n[j] * (n[i] - 1))
     })
-    vd.bf <- ntotal * (sqij/n[vj] + sqji/n[vi])
+    vd.bf <- N * (sqij/n[vj] + sqji/n[vi])
     singular.bf <- (vd.bf == 0)
     vd.bf[singular.bf] <- 1e-05
-    df.sw <- (n[vi] * sqij + n[vj] * sqji)^2/((n[vi] * sqij)^2/(n[vj] -
-        1) + (n[vj] * sqji)^2/(n[vi] - 1))
-    lambda <- sqrt(n[vi]/(gn + 1))
+
+
     cov.bf1 <- diag(nc)
     rho.bf <- diag(nc)
     for (x in 1:(nc - 1)) {
@@ -128,442 +116,324 @@ function(formula, data, type = c("UserDefined", "Tukey", "Dunnett", "Sequen",
                     n[j] * n[i] * (n[i] - 1)), function() -(t(dij[[x]]) %*%
                     dji[[y]])/(n[i] * n[w] * n[j] * (n[j] - 1)))
                 case <- (1:4)[p]
-                rho.bf[x, y] <- rho.bf[y, x] <- sqrt(ntotal *
-                  ntotal)/sqrt(vd.bf[x] * vd.bf[y]) * cl[[case]]()
+                rho.bf[x, y] <- rho.bf[y, x] <- sqrt(N*
+                  N)/sqrt(vd.bf[x] * vd.bf[y]) * cl[[case]]()
                 cov.bf1[x, y] <- cov.bf1[y, x] <- sqrt(vd.bf[x] *
                   vd.bf[y])
             }
         }
     }
     V <- (cov.bf1 + diag(vd.bf - 1)) * rho.bf
-    cov.bf1 <- cbind(V,-1*V)
-    cov.bf2<-cbind(-1*V,V)
-    cov.bf <- rbind(cov.bf1,cov.bf2)
+    cov.bf1 <- cbind(V, -1 * V)
+    cov.bf2 <- cbind(-1 * V, V)
+    cov.bf <- rbind(cov.bf1, cov.bf2)
 
-    switch(type,
-    UserDefined = {
-    if (is.null(contrast.matrix)){stop("Give a contrast matrix with the contrast.matrix = <> option or choose a contrast!")}
+#----------------------Organize the Contrast Matrix----------------------------#
 
-        if (is.null(control)) {
-            nc <- nrow(contrast.matrix)
-           weights.help <- weight.matrix(n, contrast.matrix = contrast.matrix)
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-            cmpid <- paste("C", 1:nc)
-            type.of.contrast <- "User Defined"
-        }
-        else {
-            stop("Please declare the control group via your contrast matrix!")
-        }
-        type.of.contrast <- "User Defined"
-    },
+#--------------------Special Arguments for User Defined Contrasts--------------#
+if (type=="UserDefined"){
+if(is.null(contrast.matrix)){stop("Please eanter a contrast matrix!")}
+Con<-contrast.matrix
+rownames(Con)<-paste("C",1:nrow(Con))
+for (rc in 1:nrow(Con)){if(sum(Con[rc,][Con[rc,]>0])!=1){stop("Sums of positive contrast coefficients must be 1!")}}
+colnames(Con)<-fl}
 
-    Tukey = {
-        if (is.null(control)) {
-        if (alternative!="two.sided"){stop("The Tukey contrast can only be tested two-sided!")}
-            nc <- a * (a - 1)/2
-            cmpid <- sapply(1:nc, function(arg) {
-                i <- vi[arg]
-                j <- vj[arg]
-                paste("p", "(", fl[i], ",", fl[j], ")", sep = "")
-            })
+#---------------------------Pre-Specified Contrasts----------------------------#
+if(type!="UserDefined"){
 
-            weights.help <- weight.matrix(n, "Tukey")
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-        }
-        else {
-            stop("The Tukey contrast hasn't got a control group!")
-        }
-        type.of.contrast <- "Tukey"
-    }, Dunnett = {
-        nc <- a - 1
-        if (is.null(control)) {
-            cont <- 1
-        }
-        else {
-            if (!any(fl == control)) {
-                stop("The dataset doesn't contain this control group!")
-            }
-            cont <- which(fl == control)
-        }
-        vj <- which((1:a) != cont)
-        vi <- rep(cont, a - 1)
-            weights.help <- weight.matrix(n, "Dunnett",cont)
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-        cmpid <- sapply(1:nc, function(arg) {
-            i <- vi[arg]
-            j <- vj[arg]
-            paste("p", "(", fl[i], ",", fl[j], ")", sep = "")
-        })
+#---------------------------Organize the Control Group-------------------------#
+if (is.null(control)){icon<-1}
+if (!is.null(control)){icon<-which(fl==control)}
 
-        type.of.contrast <- "Dunnett"
-    }, Sequen = {
-        if (is.null(control)) {
-            nc <- a - 1
-            vi <- 1:(a - 1)
-            vj <- 2:a
-              weights.help <- weight.matrix(n, "Sequen")
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-            cmpid <- sapply(1:nc, function(arg) {
-                i <- vj[arg]
-                j <- vi[arg]
-                paste("p", "(", fl[j], ",", fl[i], ")", sep = "")
-            })
+#----------------------------Get the Contrast Matrix---------------------------#
+Con<-contrMat(n=n,type,icon)}
 
-            type.of.contrast <- "Sequen"
-        }
-        else {
-            stop("The Sequen-Contrast hasn't got a control group!")
-        }
-    },
+nc<-nrow(Con)
+a1<-a*(a-1)
+cmpid<-rownames(Con)
+ch<-matrix(Con,ncol=a)
+colnames(ch)<- colnames(Con)
+rownames(ch) <- cmpid
 
+if (type=="Dunnett" || type=="Tukey" || type == "Sequen") {
+for (t1 in 1:nc){
+cmpid[t1]<-paste("p(",fl[which(Con[t1,]==-1)],",", fl[which(Con[t1,]==1)],")")
+}
+}
 
-    Williams = {
-        if (is.null(control)) {
+#---------------------------Compute the weight matrix--------------------------#
+vii<-c(vi,vj)
+vjj<-c(vj,vi)
+W <- matrix(0, nrow = nrow(ch), ncol = a*(a-1))
 
-            nc <- a - 1
-             weights.help <- weight.matrix(n, "Williams")
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-            cmpid <- paste("C", 1:(a - 1))
-            type.of.contrast <- "Williams"
-        }
-        else {
-            stop("The Williams contrast hasn't got a control group!")
-        }
-    }, Changepoint = {
-        if (is.null(control)) {
-            nc <- a - 1
-             weights.help <- weight.matrix(n, "Changepoint")
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-            cmpid <- paste("C", 1:(a - 1))
-            type.of.contrast <- "Changepoint"
-        }
-        else {
-            stop("The Changepoint-Contrast hasn't got a control group!")
-        }
-    }, AVE = {
-        if (is.null(control)) {
-            nc <- a
-            weights.help <- weight.matrix(n, "AVE")
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-            cmpid <- paste("C", 1:a)
-            type.of.contrast <- "Average"
-        }
-        else {
-            stop("The Average-Contrast hasn't got a control group!")
-        }
-    }, McDermott = {
-        if (is.null(control)) {
-            nc <- a - 1
-             weights.help <- weight.matrix(n, "McDermott")
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-            cmpid <- paste("C", 1:(a - 1))
+for (ss in 1:nrow(ch)){
+for (ll in 1:a1){
+h1<-vii[ll]
+h2<-vjj[ll]
 
-            type.of.contrast <- "McDermott"
-        }
-        else {
-            stop("The McDermott-Contrast hasn't got a control group!")
-        }
-    }, UmbrellaWilliams = {
-        if (is.null(control)) {
-            nc <- a * (a - 1)/2
-            weights.help <- weight.matrix(n, "UmbrellaWilliams")
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-            cmpid <- paste("C", 1:(a * (a - 1)/2))
-
-            type.of.contrast <- "Umbrella Williams"
-        }
-        else {
-            stop("The Umbrella Williams-Contrast hasn't got a control group!")
-        }
-    },
-
-    Marcus = {
-        if (is.null(control)) {
-            nc <- a * (a - 1)/2
-           weights.help <- weight.matrix(n, "Marcus")
-            weight<-weights.help$weight.matrix
-             weight.help <- weights.help$weight.help
-            cmpid <- paste("C", 1:(a * (a - 1)/2))
-
-            type.of.contrast <- "Marcus"
-        }
-        else {
-            stop("The Marcus-Contrast hasn't got a control group!")
-        }
-    }
+if(ch[ss,h1]<0 && ch[ss,h2]>0){
+W[ss,ll]<-abs(ch[ss,h1]*ch[ss,h2])}
+}}
 
 
 
-    )
 
-    pd1 <- (pd == 1)
-    pd0 <- (pd == 0)
-    pd[pd1] <- 0.999
-    pd[pd0] <- 0.001
-    pd.help1 <- c(pd, 1-pd)
-    pd <- c(weight%*%pd.help1)
-    cov.bf <- weight %*% cov.bf %*% t(weight)
+#--------------------------Compute the Point Estimators------------------------#
 
-    for (i in 1:nc) {
-        if (cov.bf[i, i] == 0) {
-            cov.bf[i, i] <- 0.001
-        }
-    }
+pd.help1 <- c(pd1, 1 - pd1)
+pd <- c(W %*% pd.help1)
 
-    vd.bf <- c(diag(cov.bf))
-    vd.bf <- c(vd.bf)
-    rho.bf <- corr.mat(cov.bf, nc)
-    t.bf <- sqrt(ntotal) * (pd - 1/2)/sqrt(vd.bf)
+pd11 <- (pd == 1)
+pd00 <- (pd == 0)
+pd[pd11] <- 0.999
+pd[pd00] <- 0.001
 
+cov.bf <- W %*% cov.bf %*% t(W)
 
+variances.bf <- c(diag(cov.bf))
 
-    rownames(weight) <- paste("C", 1:nc)
-    ncomp <- a * (a - 1)/2
-    tmp <- expand.grid(1:a, 1:a)
-    ind <- tmp[[1]] > tmp[[2]]
-    v2 <- tmp[[2]][ind]
-    v1 <- tmp[[1]][ind]
-    namen1 <- sapply(1:ncomp, function(arg) {
-        i <- v2[arg]
-        j <- v1[arg]
-        paste("p", "(", fl[i], ",", fl[j], ")", sep = "")
-    })
-    namen2 <- sapply(1:ncomp, function(arg) {
-        i <- v2[arg]
-        j <- v1[arg]
-        paste("p", "(", fl[j], ",", fl[i], ")", sep = "")
-    })
-    colnames(weight) <- c(namen1,namen2)
-    df.sw[is.nan(df.sw)] <- 1000
-    df.sw <- weight %*% c(df.sw,df.sw)
-    df.sw <- max(4, min(df.sw))
-    pd <- c(pd)
-    logit.pd <- logit(pd)
+#-------------------Compute the Test Statistics--------------------------------#
+rho.bf <- cov2cor(cov.bf)
+
+p.adj<-c()
+switch(asy.method,
+#--------------------------Logit-Transformation--------------------------------#
+logit={
+logit.pd <- logit(pd)
     logit.dev <- diag(1/(pd * (1 - pd)))
     logit.cov <- logit.dev %*% cov.bf %*% t(logit.dev)
     vd.logit <- c(diag(logit.cov))
-    t.logit <- (logit.pd) * sqrt(ntotal/vd.logit)
-    probit.pd <- qnorm(pd)
+    T <- (logit.pd) * sqrt(N/vd.logit)
+AsyMethod <- "Logit - Transformation"
+
+switch(alternative,
+#---------------------Two-Sided Alternative------------------------------------#
+two.sided = {
+text.Output <- paste("True relative contrast effect p is less or equal than 1/2")
+for (pp in 1:nc) {
+p.adj[pp] <- 1 - pmvnorm(lower = -abs(T[pp]),abs(T[pp]), corr = rho.bf, mean = rep(0,nc))
+}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "both")$quantile
+Lower1 <- logit.pd - crit/sqrt(N)*sqrt(c(diag(logit.cov)))
+Upper1 <- logit.pd + crit/sqrt(N)*sqrt(c(diag(logit.cov)))
+Lower <- expit(Lower1)
+Upper <- expit(Upper1)
+},
+
+less={
+text.Output <- paste("True relative contrast effect p is less than 1/2")
+ for (pp in 1:nc) {
+p.adj[pp] <- pmvnorm(lower = -Inf, T[pp], corr = rho.bf, mean = rep(0,nc))
+}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "lower")$quantile
+Upper1 <- logit.pd + crit/sqrt(N)*sqrt(c(diag(logit.cov)))
+Lower <- rep(0,nc)
+Upper <- expit(Upper1)
+},
+
+greater={
+text.Output <- paste("True relative contrast effect p is greater than 1/2")
+for (pp in 1:nc) {
+p.adj[pp]<-1-pmvnorm(lower =-Inf , upper =T[pp],
+                mean = rep(0, nc), corr = rho.bf)}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "lower")$quantile
+Lower1 <- logit.pd - crit/sqrt(N)*sqrt(c(diag(logit.cov)))
+Lower <- expit(Lower1)
+Upper <- rep(1,nc)
+}
+)
+},
+
+#----------------------Probit-Transformation-----------------------------------#
+
+probit ={
+probit.pd <- qnorm(pd)
     probit.dev <- diag(sqrt(2 * pi)/(exp(-0.5 * qnorm(pd) * qnorm(pd))))
     probit.cov <- probit.dev %*% cov.bf %*% t(probit.dev)
-    vd.probit <- c(diag(probit.cov))
-    t.probit <- (probit.pd) * sqrt(ntotal/vd.probit)
-    p.bfn = p.bft = p.bflogit = p.bfprobit = c()
-    p.n = p.t = p.logit = p.probit = c()
+    T <- (probit.pd) * sqrt(N/c(diag(probit.cov)))
+AsyMethod <- "Probit - Transformation"
+switch(alternative,
+#---------------------Two-Sided Alternative------------------------------------#
+two.sided = {
+text.Output <- paste("True relative contrast effect p is less or equal than 1/2")
 
-    if (alternative == "two.sided") {
+for (pp in 1:nc) {
+p.adj[pp] <- 1 - pmvnorm(lower = -abs(T[pp]),abs(T[pp]), corr = rho.bf, mean = rep(0,nc))
+}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "both")$quantile
+Lower1 <- probit.pd - crit/sqrt(N)*sqrt(c(diag(probit.cov)))
+Upper1 <- probit.pd + crit/sqrt(N)*sqrt(c(diag(probit.cov)))
+Lower <- pnorm(Lower1)
+Upper <- pnorm(Upper1)
+},
 
-     #---------------------------------------------------------#
-        #--------------Berechnung von p-Werten -------------------#
+less={
+text.Output <- paste("True relative contrast effect p is less than 1/2")
+ for (pp in 1:nc) {
+p.adj[pp] <- pmvnorm(lower = -Inf, T[pp], corr = rho.bf, mean = rep(0,nc))
+}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "lower")$quantile
+Upper1 <- probit.pd + crit/sqrt(N)*sqrt(c(diag(probit.cov)))
+Lower <- rep(0,nc)
+Upper <- pnorm(Upper1)
+},
 
-        for (i in 1:nc) {
-            p.bft[i] <- 1-pmvt(lower=-abs(t.bf[i]), abs(t.bf[i]), df=df.sw, corr=rho.bf,delta=rep(0,nc))
-            p.bfn[i] <- 1-pmvnorm(lower=-abs(t.bf[i]), abs(t.bf[i]),corr=rho.bf,mean=rep(0,nc))
-            p.bflogit[i] <- 1-pmvnorm(lower=-abs(t.logit[i]), abs(t.logit[i]),corr=rho.bf ,mean=rep(0,nc))
-            p.bfprobit[i] <- 1-pmvnorm(lower=-abs(t.probit[i]), abs(t.probit[i]),corr=rho.bf,mean=rep(0,nc))
-            p.tt <- pt(t.bf[i], df.sw)
-            p.t[i] <- min(2*p.tt,2-2*p.tt)
-            p.nn <- pnorm(t.bf[i])
-            p.n[i] <- min(2*p.nn, 2-2*p.nn)
-            p.ll <- pnorm(t.logit[i])
-            p.logit[i] <- min(2*p.ll, 2-2*p.ll)
-            p.pp <- pnorm(t.probit[i])
-            p.probit[i] <- min(2*p.pp, 2-2*p.pp)
-        }
-        z.bft <- qmvt(conflevel, df = df.sw, corr=rho.bf, tail = "both")$quantile
-        z.bfn <- qmvnorm(conflevel, corr=rho.bf, tail = "both")$quantile
+greater={
+text.Output <- paste("True relative contrast effect p is greater than 1/2")
+for (pp in 1:nc) {
+p.adj[pp]<-1-pmvnorm(lower =-Inf , upper =T[pp],
+                mean = rep(0, nc), corr = rho.bf)}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "lower")$quantile
+Lower1 <- probit.pd - crit/sqrt(N)*sqrt(c(diag(probit.cov)))
+Lower <- pnorm(Lower1)
+Upper <- rep(1,nc)
+}
+)
+},
 
-        lower.bft <- pd - sqrt(vd.bf/ntotal) * z.bft
-        upper.bft <- pd + sqrt(vd.bf/ntotal) * z.bft
-        lower.bfn <- pd - sqrt(vd.bf/ntotal) * z.bfn
-        upper.bfn <- pd + sqrt(vd.bf/ntotal) * z.bfn
-        lower.logit <- expit(logit.pd - sqrt(vd.logit/ntotal) *
-            z.bfn)
-        upper.logit <- expit(logit.pd + sqrt(vd.logit/ntotal) *
-            z.bfn)
-        lower.probit <- pnorm(probit.pd - sqrt(vd.probit/ntotal) *
-            z.bfn)
-        upper.probit <- pnorm(probit.pd + sqrt(vd.probit/ntotal) *
-            z.bfn)
+#--------------------------Multi-Normal Approximation--------------------------#
+normal ={
+AsyMethod <- "Normal - Approximation"
+    T <- sqrt(N) * (pd - 1/2)/sqrt(variances.bf)
 
-        text.output.p <- "H_0: p(i,j)=1/2"
-        text.output.KI <- paste(100 * conflevel, "%", "2-sided",
-            "Simultaneous-Confidence-Intervals for Relative Effects")
-        upper <- "]"
-        lower <- "["
-    }
-    if (alternative == "greater") {
-               z.bft <- qmvt(conflevel, df = df.sw, corr=rho.bf, tail = "lower")$quantile
-        z.bfn <- qmvnorm(conflevel, corr = rho.bf, tail = "lower")$quantile
-        lower.bft <- pd - sqrt(vd.bf/ntotal) * z.bft
-        lower.bfn <- pd - sqrt(vd.bf/ntotal) * z.bfn
-        lower.logit <- expit(logit.pd - sqrt(vd.logit/ntotal) *
-            z.bfn)
-        lower.probit <- pnorm(probit.pd - sqrt(vd.probit/ntotal) *
-            z.bfn)
-        upper.bft = upper.probit = upper.logit = upper.bfn = 1
-        for (i in 1:nc) {
-            p.bfn[i] <- 1 - pmvnorm(lower = -Inf, upper = t.bf[i],
-                mean = rep(0, nc), corr = rho.bf)
-            p.bft[i] <- 1 - pmvt(lower = -Inf, upper = t.bf[i],
-                delta = rep(0, nc), df = df.sw, corr = rho.bf)
-            p.bflogit[i] <- 1 - pmvnorm(lower = -Inf, upper = t.logit[i],
-                mean = rep(0, nc), corr = rho.bf)
-            p.bfprobit[i] <- 1 - pmvnorm(lower = -Inf, upper = t.probit[i],
-                mean = rep(0, nc), corr = rho.bf)
+switch(alternative,
+#---------------------Two-Sided Alternative------------------------------------#
+two.sided = {
+text.Output <- paste("True relative contrast effect p is less or equal than 1/2")
+for (pp in 1:nc) {
+p.adj[pp] <- 1 - pmvnorm(lower = -abs(T[pp]),abs(T[pp]), corr = rho.bf, mean = rep(0,nc))
+}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "both")$quantile
+Lower <- pd - crit/sqrt(N)*sqrt(variances.bf)
+Upper <- pd + crit/sqrt(N)*sqrt(variances.bf)
 
-            p.t[i] <-1-pt(t.bf[i], df.sw)
-            p.n[i] <- 1-pnorm(t.bf[i])
-            p.logit[i] <- 1- pnorm(t.logit[i])
-            p.probit[i] <-1- pnorm(t.probit[i])
+},
 
-        }
-        text.output.p <- "H_0: p(i,j)<=1/2"
-        text.output.KI <- paste(100 * conflevel, "%", "1-sided",
-            "Simultaneous-Confidence-Intervals for Relative Effects")
-        upper <- "]"
-        lower <- "("
-    }
-    if (alternative == "lower") {
-        z.bft <- qmvt(conflevel, df = df.sw, corr=rho.bf, tail = "lower")$quantile
-        z.bfn <- qmvnorm(conflevel, corr = rho.bf, tail = "lower")$quantile
-        upper.bft <- pd + sqrt(vd.bf/ntotal) * z.bft
-        upper.bfn <- pd + sqrt(vd.bf/ntotal) * z.bfn
-        upper.logit <- expit(logit.pd + sqrt(vd.logit/ntotal) *
-            z.bfn)
-        upper.probit <- pnorm(probit.pd + sqrt(vd.probit/ntotal) *
-            z.bfn)
-        lower.bft = lower.probit = lower.logit = lower.bfn = 0
-        for (i in 1:nc) {
-            p.bfn[i] <- 1 - pmvnorm(lower = t.bf[i], upper = Inf,
-                mean = rep(0, nc), corr = rho.bf)
-            p.bft[i] <- 1 - pmvt(lower = t.bf[i], upper = Inf,
-                delta = rep(0, nc), df = df.sw, corr = rho.bf)
-            p.bflogit[i] <- 1 - pmvnorm(lower = t.logit[i], upper = Inf,
-                mean = rep(0, nc), corr = rho.bf)
-            p.bfprobit[i] <- 1 - pmvnorm(lower = t.probit[i],
-                upper = Inf, mean = rep(0, nc), corr = rho.bf)
-            p.t[i] <-  pt(t.bf[i], df.sw)
-            p.n[i] <- pnorm(t.bf[i])
-            p.logit[i] <- pnorm(t.logit[i])
-            p.probit[i] <- pnorm(t.probit[i])
-        }
-        text.output.p <- " H_0: p(i,j)>=1/2"
-        text.output.KI <- paste(100 * conflevel, "%", "1-sided",
-            "Simultaneous-Confidence-Intervals for Relative Effects")
-        upper <- ")"
-        lower <- "["
-    }
-    bfn.output <- paste(lower, round(lower.bfn, rounds), ";",
-        round(upper.bfn, rounds), upper)
-    bft.output <- paste(lower, round(lower.bft, rounds), ";",
-        round(upper.bft, rounds), upper)
-    logit.output <- paste(lower, round(lower.logit, rounds),
-        ";", round(upper.logit, rounds), upper)
-    probit.output <- paste(lower, round(lower.probit, rounds),
-        ";", round(upper.probit, rounds), upper)
-    p.bflogit <- round(p.bflogit, rounds)
-    p.bfprobit <- round(p.bfprobit, rounds)
-    p.bft <- round(p.bft, rounds)
-    p.bfn <- round(p.bfn, rounds)
-    p.logit <- round(p.logit, rounds)
-    p.probit <- round(p.probit, rounds)
-    p.t <- round(p.t, rounds)
-    p.n <- round(p.n, rounds)
-    pd <- round(pd, rounds)
-    if (correlation == TRUE) {
-        Correlation <- list(Correlation.matrix.N = rho.bf, Covariance.matrix.N = cov.bf,
-            Warning = paste("Attention! The covariance matrix is multiplied with N",
-                "=", ntotal))
-    }
-    else {
-        Correlation <- NA
-    }
+less={
+text.Output <- paste("True relative contrast effect p is less than 1/2")
+ for (pp in 1:nc) {
+p.adj[pp] <- pmvnorm(lower = -Inf, T[pp], corr = rho.bf, mean = rep(0,nc))
+}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "lower")$quantile
+Lower <- rep(0,nc)
+Upper <- pd + crit/sqrt(N)*sqrt(variances.bf)
+},
+
+greater={
+text.Output <- paste("True relative contrast effect p is greater than 1/2")
+for (pp in 1:nc) {
+p.adj[pp]<-1-pmvnorm(lower =-Inf , upper =T[pp],
+                mean = rep(0, nc), corr = rho.bf)}
+crit<- qmvnorm(conflevel, corr = rho.bf, tail = "lower")$quantile
+Lower <- pd - crit/sqrt(N)*sqrt(variances.bf)
+Upper <- rep(1,nc)
+}
+)
+},
+
+#-------------------------Multi-t-Approximation--------------------------------#
+mult.t ={
+
+df.sw <- (n[vi] * sqij + n[vj] * sqji)^2/((n[vi] * sqij)^2/(n[vj] -
+        1) + (n[vj] * sqji)^2/(n[vi] - 1))
+df.sw[is.nan(df.sw)] <- 1000
+    df.sw <- W %*% c(df.sw, df.sw)
+    df.sw <- max(4, min(df.sw))
+df.sw<-round(df.sw)
+T <- sqrt(N) * (pd - 1/2)/sqrt(variances.bf)
+AsyMethod <- paste("Multi - T with", round(df.sw,rounds), "DF")
+switch(alternative,
+#---------------------Two-Sided Alternative------------------------------------#
+two.sided = {
+text.Output <- paste("True relative contrast effect p is less or equal than 1/2")
+for (pp in 1:nc) {
+p.adj[pp] <- 1 - pmvt(lower = -abs(T[pp]),abs(T[pp]), corr = rho.bf,  df= df.sw, delta = rep(0,nc))
+}
+crit<- qmvt(conflevel, df=df.sw, corr = rho.bf, tail = "both")$quantile
+Lower <- pd - crit/sqrt(N)*sqrt(variances.bf)
+Upper <- pd + crit/sqrt(N)*sqrt(variances.bf)
+
+},
+
+less={
+text.Output <- paste("True relative contrast effect p is less than 1/2")
+ for (pp in 1:nc) {
+p.adj[pp] <- pmvt(lower = -Inf, T[pp], corr = rho.bf, delta = rep(0,nc),df=df.sw)}
+crit<- qmvt(conflevel, corr = rho.bf, tail = "lower",df=df.sw)$quantile
+Lower <- rep(0,nc)
+Upper <- pd + crit/sqrt(N)*sqrt(vd.bf)
+},
+
+greater={
+text.Output <- paste("True relative contrast effect p is greater than 1/2")
+for (pp in 1:nc) {
+p.adj[pp]<-1-pmvt(lower =-Inf , upper =T[pp],
+                delta = rep(0, nc), corr = rho.bf, df=df.sw)}
+crit<- qmvt(conflevel, corr = rho.bf, tail = "lower", df=df.sw)$quantile
+Lower <- pd - crit/sqrt(N)*sqrt(variances.bf)
+Upper <- rep(1,nc)
+}
+)
+}
+)
+
+#-------------------------Plot of the SCI--------------------------------------#
+
+if (plot.simci == TRUE) {
+text.Ci<-paste(conflevel*100, "%", "Simultaneous Confidence Intervals")
+ Lowerp<-"|"
+       plot(pd,1:nc,xlim=c(0,1), pch=15,axes=FALSE,xlab="",ylab="")
+       points(Lower,1:nc, pch=Lowerp,font=2,cex=2)
+              points(Upper,1:nc, pch=Lowerp,font=2,cex=2)
+              abline(v=0.5, lty=3,lwd=2)
+              for (ss in 1:nc){
+              polygon(x=c(Lower[ss],Upper[ss]),y=c(ss,ss),lwd=2)}
+              axis(1, at = seq(0, 1, 0.1))
+              axis(2,at=1:nc,labels=cmpid)
+                box()
+ title(main=c(text.Ci, paste("Type of Contrast:",type), paste("Method:", AsyMethod) ))
+
+
+ }
+
+
+
     data.info <- data.frame(row.names = 1:a, Sample = fl, Size = n)
-    switch(asy.method, logit = {
-        x.werte = cbind(lower.logit, pd, upper.logit)
-        result <- list(weight.matrix = weight, Data.Info = data.info,
-            Analysis.of.relative.effects = data.frame(row.names = c(1:nc),
-                Comparison = cmpid, rel.effect = pd, confidence.interval = logit.output,
-                t.value = t.logit, p.value.adjusted = p.bflogit, p.value.unadjusted = p.logit), Mult.Distribution = data.frame(Quantile = z.bfn,
-                p.Value.global = min(p.bflogit)), Correlation = Correlation)
-        Asymptotic.Method <- "Multivariate Delta-Method (Logit)"
-    }, probit = {
-        x.werte = cbind(lower.probit, pd, upper.probit)
-        result <- list(weight.matrix = weight, Data.Info = data.info,
-            Analysis.of.relative.effects = data.frame(row.names = c(1:nc),
-                Comparison = cmpid, rel.effect = pd, confidence.interval = probit.output,
-                t.value = t.probit, p.value.adjusted = p.bfprobit, p.value.unadjusted = p.probit), Mult.Distribution = data.frame(Quantile = z.bfn,
-                p.Value.global = min(p.bfprobit)), Correlation = Correlation)
-        Asymptotic.Method <- "Multivariate Delta-Method (Probit)"
-    }, normal = {
-        x.werte = cbind(lower.bfn, pd, upper.bfn)
-        result <- list(weight.matrix = weight, Data.Info = data.info,
-            Analysis.of.relative.effects = data.frame(row.names = c(1:nc),
-                Comparison = cmpid, rel.effect = pd, confidence.interval = bfn.output,
-                t.value = t.bf, p.value.adjusted = p.bfn, p.value.unadjusted = p.n), Mult.Distribution = data.frame(Quantile = z.bfn,
-                p.Value.global = min(p.bfn)), Correlation = Correlation)
-        Asymptotic.Method <- "Multivariate Normal Distribution"
-    }, mult.t = {
-        x.werte = cbind(lower.bft, pd, upper.bft)
-        result <- list(weight.matrix = weight, Data.Info = data.info,
-            Analysis.of.relative.effects = data.frame(row.names = c(1:nc),
-                Comparison = cmpid, rel.effect = pd, confidence.interval = bft.output,
-                t.value = t.bf, p.value.adjusted = p.bft,p.value.unadjusted = p.t), Mult.Distribution = data.frame(Quantile = z.bft,
-                p.Value.global = min(p.bft), d.f. = df.sw), Correlation = Correlation)
-        Asymptotic.Method <- paste("Multi t - Distribution with d.f.= ",
-            round(df.sw, 4))
-    })
-    if (plot.simci == TRUE) {
-        test <- matrix(c(1:nc), ncol = nc, nrow = nc)
-        angaben <- c(cmpid)
-        angaben <- matrix(c(angaben), ncol = nc, nrow = nc)
-        k <- c(1:nc)
-        plot(x.werte[, 2], k, xlim = c(0, 1), axes = FALSE, type = "p",
-            pch = 15, xlab = "", ylab = "")
-        abline(v = 0.5, col = "red", lty = 1, lwd = 3)
-        axis(1, at = seq(0, 1, 0.1))
-        axis(2, at = test, labels = angaben)
-        axis(4, at = test, labels = test)
-        points(x = x.werte[, 3], y = test[, 1], pch = upper,font=2)
-        points(x = x.werte[, 1], y = test[, 1], pch = lower,font=2)
-        for (i in 1:nc) {
-            polygon(c(x.werte[i, 1], x.werte[i, 3]), c(i, i),lwd=3)
-        }
-        box()
-        title(main = c(text.output.KI, paste("Type of Contrast:",
-            "", type.of.contrast, sep = ""), paste("Method:",
-            "", Asymptotic.Method, sep = "")), ylab = "Comparison",
-            xlab = paste("lower", lower, "-----", "p", "------",
-                upper, "upper"))
-    }
-    if (info == TRUE) {
-        cat("\n", "", "Nonparametric Multiple Comparison Procedure based on relative contrast effects",
-            ",", "Type of Contrast", ":", type.of.contrast, "\n",
-            "NOTE:", "\n", "*-------------------Weight Matrix------------------*",
-            "\n", "-", "Weight matrix for choosen contrast based on all-pairs comparisons",
-            "\n", "\n", "*-----------Analysis of relative effects-----------*",
-            "\n", "-", "Simultaneous Confidence Intervals for relative effects p(i,j)\n      with confidence level",
-            conflevel, "\n", "-", "Method", "=", Asymptotic.Method,
-            "\n", "-", "p-Values for ", text.output.p, "\n",
-            "\n", "*----------------Interpretation--------------------*",
-            "\n", "p(a,b)", ">", "1/2", ":", "b tends to be larger than a",
-            "\n", "*--------------Mult.Distribution-------------------*",
-            "\n", "-", "Equicoordinate Quantile", "\n", "-", "Global p-Value",
-            "\n", "*--------------------------------------------------*",
+    Analysis <- data.frame(Comparison=cmpid, Estimator=round(pd,rounds), Lower=round(Lower,rounds), Upper=round(Upper,rounds), Statistic=T, p.Value=p.adj)
+    Overall<-data.frame(Quantile=crit, p.Value=min(p.adj))
+    result<-list(Data.Info=data.info, Contrast=ch, Analysis=Analysis, Overall=Overall)
+
+     if (info == TRUE) {
+        cat("\n", "#------Nonparametric Multiple Comparisons for relative contrast effects-----#", "\n","\n",
+        "-", "Alternative Hypothesis: ", text.Output,"\n",
+        "-", "Type of Contrast", ":", type, "\n", "-", "Confidence level:",
+            conflevel*100,"%", "\n", "-", "Method", "=", AsyMethod,"\n",
+                    "-", "Estimation Method: Pairwise rankings","\n", "\n",
+                    "#---------------------------Interpretation----------------------------------#",
+            "\n", "p(a,b)", ">", "1/2", ":", "b tends to be larger than a","\n",
+            "#---------------------------------------------------------------------------#", "\n",
+
             "\n")
     }
-
-    return(result)
-
+    
+#------------------------Informations on the Weight-Matrix---------------------#
+if (weight.matrix==TRUE){
+colW<-c()
+for (wc in 1:a1){colW[wc]<-paste("p(",fl[vii[wc]],",", fl[vjj[wc]],")")}
+colnames(W)<-colW
+result$Weight.Matrix<-W
+result$AllPairs<-data.frame(Pairs=colW, Effect=pd.help1)}
+#------------------------Informations on the Correlation Matrix-----------------#
+if (correlation == TRUE){
+result$Covariance<-cov.bf
+result$Correlation <- rho.bf
 }
 
+#------------------------Give the Result---------------------------------------#
+result$input<-input.list
+result$text.Output<-text.Output
+result$connames<-cmpid
+result$AsyMethod<-AsyMethod
+class(result)<-"nparcomp"
+return(result)
+}

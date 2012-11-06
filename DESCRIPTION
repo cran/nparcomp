@@ -1,11 +1,11 @@
 Package: nparcomp
 Type: Package
-Title: nparcomp-package
-Version: 1.0-1
-Date: 2011-02-17
+Title: Perform multiple comparisons and compute simultaneous confidence
+        intervals for the nonparametric relative contrast effects.
+Version: 2.0
+Date: 2012-11-06
 Author: Frank Konietschke
 Maintainer: Frank Konietschke <fkoniet@gwdg.de>
-Depends: multcomp, mvtnorm
 Description: With this package, it is possible to compute nonparametric
         simultaneous confidence intervals for relative contrast effects
         in the unbalanced one way layout. Moreover, it computes
@@ -19,6 +19,8 @@ Description: With this package, it is possible to compute nonparametric
         underlying distribution function, only that the data have to be
         at least ordinal numbers.
 License: GPL
-Packaged: 2011-02-17 11:38:04 UTC; Schaarschmidt
+LazyLoad: yes
+Depends: multcomp, mvtnorm
+Packaged: 2012-11-06 12:09:31 UTC; mplacze
 Repository: CRAN
-Date/Publication: 2011-02-18 17:29:54
+Date/Publication: 2012-11-06 14:42:24
