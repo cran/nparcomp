@@ -12,10 +12,6 @@ function (formula, data, type = c("UserDefined", "Tukey", "Dunnett", "Sequen",
                    control=control, info=info, rounds=rounds, 
                    contrast.matrix=contrast.matrix, correlation=correlation)
     conflevel<-conf.level
-#-----------------------Necessary R Packages-----------------------------------#
-
-mvtnorm <- require(mvtnorm, quietly = TRUE)
-multcomp <- require(multcomp, quietly = TRUE)
 
 #-------------------------Quality Checks---------------------------------------#
      if (conflevel >= 1 || conflevel <= 0) {
@@ -109,6 +105,13 @@ Yd<-Yd+1/(n-1)*(t(Zlong[k,]-t(Zquer))%*%(Zlong[k,]-t(Zquer)))
 W<- matrix(rep(1/a*diag(a),a),nrow=a)
 Vd<-W%*%Yd%*%t(W)
 
+    logit.pd<-log(c(pd/(1-pd)))
+    logit.pd.dev<-diag(1/c((pd*(1-pd))))
+Lower.logit1 <-logit.pd-qnorm(conf.level)/sqrt(n)*sqrt(c(diag(logit.pd.dev%*%Vd%*%t(logit.pd.dev))))
+Upper.logit1 <-logit.pd+qnorm(conf.level)/sqrt(n)*sqrt(c(diag(logit.pd.dev%*%Vd%*%t(logit.pd.dev))))
+Lower.logit <- exp(Lower.logit1)/(1+exp(Lower.logit1))
+Upper.logit <- exp(Upper.logit1)/(1+exp(Upper.logit1))
+
     corr.mat <- function(m, nc) {
         rho <- matrix(c(0), ncol = nc, nrow = nc)
         for (i in 1:nc) {
@@ -147,7 +150,7 @@ Upper <- Cpd + crit/sqrt(n)*sqrt(c(diag(CV)))
 less={
 text.Output <- paste("True differences of relative effects are less than 0")
 for (pp in 1:nc) {
-p.adj[pp]<-pmvt(lower = -Inf , upper = T[pp], df=dfT,
+p.adj[pp]<-1-pmvt(lower = T[pp] , upper = Inf, df=dfT,
                 delta = rep(0, nc), corr = rhobf)}
 crit<- qmvt(conflevel, df=dfT, corr = rhobf, tail = "lower")$quantile
 Lower <- rep(-1,nc)
@@ -182,7 +185,7 @@ Upper <- Cpd + crit/sqrt(n)*sqrt(c(diag(CV)))
 less={
 text.Output <- paste("True differences of relative effects are less than 0")
 for (pp in 1:nc) {
-p.adj[pp]<-pmvnorm(lower = -Inf , upper = T[pp],
+p.adj[pp]<-1-pmvnorm(lower = T[pp] , upper = Inf,
                 mean = rep(0, nc), corr = rhobf)}
 crit<- qmvnorm(conflevel, corr = rhobf, tail = "lower")$quantile
 Lower <- rep(-1,nc)
@@ -213,8 +216,8 @@ text.Output <- paste("True differences of relative effects are less or equal tha
 for (pp in 1:nc) {
 p.adj[pp]<-1-pmvt(lower=-abs(T[pp]), upper= abs(T[pp]), delta=rep(0,nc),corr=rhobf, df=dfT)[1]}
 crit<- qmvt(conflevel, corr = rhobf, tail = "both",df=dfT)$quantile
-Lower1 <- Cpd - crit/sqrt(n)*sqrt(c(diag(CV)))
-Upper1 <- Cpd + crit/sqrt(n)*sqrt(c(diag(CV)))
+Lower1 <- Cfisher - crit/sqrt(n) * sqrt(c(diag(Vfisher)))
+Upper1 <- Cfisher + crit/sqrt(n) * sqrt(c(diag(Vfisher)))
 Lower <- (exp(2*Lower1)-1)/(exp(2*Lower1)+1)
 Upper <-  (exp(2*Upper1)-1)/(exp(2*Upper1)+1)
 },
@@ -222,10 +225,10 @@ Upper <-  (exp(2*Upper1)-1)/(exp(2*Upper1)+1)
 less={
 text.Output <- paste("True differences of relative effects are less than 0")
 for (pp in 1:nc) {
-p.adj[pp]<-pmvt(lower = -Inf , upper = T[pp],delta = rep(0, nc), df=dfT, corr = rhobf)}
+p.adj[pp]<-pmvt(lower = T[pp] , upper = Inf,delta = rep(0, nc), df=dfT, corr = rhobf)}
 crit<- qmvt(conflevel, corr = rhobf, tail = "lower",df=dfT)$quantile
 Lower <- rep(-1,nc)
-Upper1 <- Cpd + crit/sqrt(n)*sqrt(c(diag(CV)))
+Upper1 <- Cfisher + crit/sqrt(n) * sqrt(c(diag(Vfisher)))
 Upper <-  (exp(2*Upper1)-1)/(exp(2*Upper1)+1)
 },
 #--------------------Alternative= GREATER--------------------------------------#
@@ -234,14 +237,14 @@ text.Output <- paste("True differences of relative effects are greater than 0")
 for (pp in 1:nc) {
 p.adj[pp]<-1-pmvt(lower =-Inf , upper =T[pp],delta = rep(0, nc), corr = rhobf,df=dfT)}
 crit<- qmvnorm(conflevel, corr = rhobf, tail = "lower")$quantile
-Lower1 <-Cpd - crit/sqrt(n)*sqrt(c(diag(CV)))
+Lower1 <- Cfisher - crit/sqrt(n) * sqrt(c(diag(Vfisher)))
 Lower <-  (exp(2*Lower1)-1)/(exp(2*Lower1)+1)
 Upper <- rep(1,nc)}
 )
 }
 )
 
-data.info <- data.frame(Sample=fl, Size=n, Effect = pd)
+data.info <- data.frame(Sample=fl, Size=n, Effect = pd,Lower=Lower.logit,Upper=Upper.logit)
 Analysis.of.Relative.Effects <- data.frame(Estimator=round(Cpd,rounds), Lower=round(Lower,rounds), Upper=round(Upper,rounds),
  Statistic = round(T,rounds), p.Value=p.adj)
 Overall<-data.frame(Quantile=crit, p.Value=min(p.adj))

@@ -71,6 +71,8 @@ mctp(formula, data, type = c("Tukey", "Dunnett", "Sequen",
 \references{
 F. Konietschke, L.A. Hothorn, E. Brunner: Rank-Based Multiple Test Procedures and
 Simultaneous Confidence Intervals. Electronic Journal of Statistics, Vol.0 (2011) 1-8.
+
+Konietschke, F., Placzek, M., Schaarschmidt, S., Hothorn, L.A. (2014). nparcomp: An R Software Package for Nonparametric Multiple Comparisons and Simultaneous Confidence Intervals. Journal of Statistical Software, 61(10), 1-17.       
 }
 \author{ Frank Konietschke}
 \note{ If the samples are completely seperated the variance estimators are Zero by construction. In these cases the Null-estimators

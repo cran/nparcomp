@@ -1,0 +1,22 @@
+citHeader("To cite nparcomp in publications use:")
+
+citEntry(entry = "Article",
+  title        = "{nparcomp}: An {R} Software Package for Nonparametric Multiple Comparisons and Simultaneous Confidence Intervals",
+  author       = personList(as.person("Frank Konietschke"),
+                   as.person("Marius Placzek"),
+                   as.person("Frank Schaarschmidt"),
+                   as.person("Ludwig A. Hothorn")),
+  journal      = "Journal of Statistical Software",
+  year         = "2014",
+  volume       = "61",
+  number       = "10",
+  pages        = "1--17",
+  url          = "http://www.jstatsoft.org/v61/i10/",
+
+  textVersion  =
+  paste("Frank Konietschke, Marius Placzek, Frank Schaarschmidt, Ludwig A. Hothorn (2014).",
+        "nparcomp: An R Software Package for Nonparametric Multiple Comparisons and Simultaneous Confidence Intervals.",
+        "Journal of Statistical Software, 61(10), 1-17.",
+        "URL http://www.jstatsoft.org/v61/i10/.")
+)
+

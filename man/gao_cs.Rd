@@ -48,6 +48,8 @@ gao_cs(formula, data, alpha = 0.05, silent = FALSE)
 }
 \references{
 Gao, X. et al. (2008). Nonparametric Multiple Comparison Procedures for Unbalanced One-Way Factorial Designs. JSPI 138, 2574 - 2591.
+
+Konietschke, F., Placzek, M., Schaarschmidt, S., Hothorn, L.A. (2014). nparcomp: An R Software Package for Nonparametric Multiple Comparisons and Simultaneous Confidence Intervals. Journal of Statistical Software, 61(10), 1-17.       
 }
 \author{
 Frank Konietschke

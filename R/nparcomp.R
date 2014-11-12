@@ -13,9 +13,6 @@ input.list <- list(formula = formula, data = data, type = type[1],
                    control=control, info=info, rounds=rounds, 
                    contrast.matrix=contrast.matrix, correlation=correlation,
                    weight.matrix=weight.matrix)
-#---------------------Required Packages----------------------------------------#
-    mvtnorm <- require(mvtnorm, quietly = TRUE)
-    multcomp <- require(multcomp, quietly = TRUE)
 
 #----------------------Necessary Functions-------------------------------------#
 ssq <- function(x) {sum(x * x)}

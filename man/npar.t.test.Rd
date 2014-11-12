@@ -57,6 +57,7 @@ Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asympt
 
 Neubert, K., Brunner, E., (2006). A Studentized Permutation Test for the Nonparametric Behrens-Fisher Problem. Computational Statistics and Data Analysis.
 
+Konietschke, F., Placzek, M., Schaarschmidt, S., Hothorn, L.A. (2014). nparcomp: An R Software Package for Nonparametric Multiple Comparisons and Simultaneous Confidence Intervals. Journal of Statistical Software, 61(10), 1-17.       
 }
 
 \author{ Frank Konietschke }
