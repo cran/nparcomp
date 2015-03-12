@@ -1,10 +1,10 @@
-3f0cee0dee93e4d223a10577922dea85 *DESCRIPTION
+92ff3b208bb7cbf4edd95649b914142b *DESCRIPTION
 67d64b5e325f752958f4ed00f8a095d7 *NAMESPACE
 ce64e0970d4ecc8ebaa697469e49268a *R/gao.R
 6b5a524cda473bf2eb4214050c282539 *R/gao_cs.R
 c89dfa72fab9fa659791b1e60037ae9e *R/mctp.R
-057292ee9a22c425bcc0c03868b253e2 *R/mctp.rm.R
-8f5feddbc8bb040dcc56c338d542652d *R/npar.t.test.R
+8dfe0d54e2f8b508b401d5b7cbf61580 *R/mctp.rm.R
+4a39b81162f6208283016b0fbf8db382 *R/npar.t.test.R
 dec5cd162ae820139e5f4540aff4c5de *R/npar.t.test.paired.r
 af76dfd43b341960d8f38c99570db444 *R/nparcomp.R
 2fe3c77190af704f82abb517d2a7d56b *R/plot.mctp.R
@@ -24,7 +24,7 @@ e4ef8f04929fc0855e7afe23af2fffc2 *data/colu.rda
 d92becd99eae9bb66e2348b24a6c2d45 *data/liver.rda
 96f1e9ecaa8b9c25372d6cc9d6596d0c *data/panic.rda
 81977cce72e5c33b4b2d31298d53a8ac *data/reaction.rda
-01fb85d65e1273b671b55a88b8151390 *inst/CITATION
+b482c8b077d0ad3d030374082e1e372d *inst/CITATION
 bde1d384c6a3e2af518856dd9c9566af *man/PGI.rd
 116ca0a062569756b163b7d50b9b638a *man/appetite.Rd
 87d2bbb700bba0d08d475f620796ec3a *man/colu.Rd

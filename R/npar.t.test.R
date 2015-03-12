@@ -238,7 +238,7 @@ result<-list(Info=data.info, Analysis=Analysis)
 #------------------------Studentized Permutation Test----------------------------#
 permu = {
 plotz<-3
-#-------------------Diese Funktionen sind notwendig für die Verwendung der Hauptfunktion-----------------------#
+#-------------------Diese Funktionen sind notwendig fuer die Verwendung der Hauptfunktion-----------------------#
 logit<-function(x){
 	return(log(x/(1-x)))
 }

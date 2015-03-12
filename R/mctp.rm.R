@@ -73,7 +73,7 @@ rownames(Con)<-connames
 colnames(Con)<-colnames(ch)
 ##################################################
 
-#########Schätzer#################################
+#########estimators#################################
 tmp1<-sort(rep(1:a,a))
 tmp2<-rep(1:a,a)
 pairRanks<-lapply(1:(a^2),function(arg)
