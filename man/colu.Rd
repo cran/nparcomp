@@ -24,8 +24,9 @@
 }
 
 \examples{
+\dontrun{
 library(nparcomp)
 data(colu)
 boxplot(corpora~dose,data=colu)
-}
+}}
 \keyword{datasets}

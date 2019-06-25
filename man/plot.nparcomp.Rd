@@ -50,12 +50,13 @@ by setting plot.simci=TRUE in the \code{\link{nparcomp}}-statement.
 For further information on the usage of nparcomp, see \code{\link{nparcomp}}.
 }
 \examples{
+\dontrun{
 data(liver)
 a<-nparcomp(weight ~dosage, data=liver, asy.method = "probit", 
             type = "Williams", alternative = "two.sided", 
             plot.simci = FALSE, info = FALSE)
 plot(a)
-}
+}}
 
 \keyword{aplot}
 

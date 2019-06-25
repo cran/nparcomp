@@ -79,6 +79,7 @@ For the analysis, the R packages 'multcomp' and 'mvtnorm' are required.
 
 \seealso{ For two-sample comparisons based on relative effects, see \code{\link{npar.t.test}}. }
 \examples{
+\dontrun{
 
 data(liver)
 
@@ -118,7 +119,7 @@ b<-nparcomp(corpora~ dose, data=colu, asy.method = "mult.t",
 summary(b)
 
 
-}
+}}
 
 \keyword{htest}
 

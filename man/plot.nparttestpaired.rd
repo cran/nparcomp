@@ -50,10 +50,11 @@ by setting plot.simci=TRUE in the \code{\link{npar.t.test.paired}}-statement.
 For further information on the usage of npar.t.test.paired, see \code{\link{npar.t.test.paired}}.
 }
 \examples{
+\dontrun{
 data(PGI)
 a<-npar.t.test.paired(PGIscore~timepoint, data = PGI, 
                alternative = "two.sided", info=TRUE, plot.simci=FALSE)
 plot(a)
-}
+}}
 
 \keyword{aplot}

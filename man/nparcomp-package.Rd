@@ -42,6 +42,7 @@ Munzel. U., Hothorn, L.A. (2001). A unified Approach to Simultaneous Rank Tests 
 \keyword{ htest }
 
 \examples{
+\dontrun{
 
 # two sample comparisons: Nonparametric Behrens-Fisher Problem
 
@@ -91,4 +92,4 @@ b<-nparcomp(corpora~ dose, data=colu, asy.method = "mult.t",
 summary(b)
 plot(b)
 
-}
+}}

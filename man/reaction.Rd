@@ -27,8 +27,9 @@ Dose Levels of a Treatment. Biometrics 33, 386 - 389.
 Dose Levels of a Treatment. Biometrics 33, 386 - 389.
 }
 \examples{
+\dontrun{
 library(nparcomp)
 data(reaction)
 boxplot(Time~Group,data=reaction)
-}
+}}
 \keyword{datasets}

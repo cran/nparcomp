@@ -27,7 +27,8 @@ Brunner, E., Domhof, S., Langer, F. (2002): Nonparametric Analysis of Longitudin
 }
 
 \examples{
+\dontrun{
 data(panic)
 boxplot(CGI~week,data=panic)
-}
+}}
 \keyword{datasets}

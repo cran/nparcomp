@@ -53,14 +53,16 @@ by using the function \code{\link{plot.nparttest}}.
 \seealso{
 For further information on the usage of npar.t.test, see \code{\link{npar.t.test}}.
 }
+
 \examples{
+\dontrun{
 data(impla)
 a<-npar.t.test(impla~group, data = impla, method = "t.app",
                alternative = "two.sided", 
                plot.simci=FALSE, info=FALSE)
 summary(a)
 
-}
+}}
 
 \keyword{print}
 

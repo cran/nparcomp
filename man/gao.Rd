@@ -58,6 +58,7 @@ Frank Konietschke
 For nonparametric all-pairs comparison see \code{\link{gao_cs}}.
 }
 \examples{
+\dontrun{
 
 data(liver)
 
@@ -66,7 +67,7 @@ gao(weight ~dosage, data=liver,alpha=0.05)
  # Control= 3
 
 gao(weight ~dosage, data=liver,alpha=0.05,control="3")
-}
+}}
 
 \keyword{htest}
 

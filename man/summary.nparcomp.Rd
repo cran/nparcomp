@@ -56,13 +56,15 @@ by using the function \code{\link{plot.nparcomp}}.
 \seealso{
 For further information on the usage of nparcomp, see \code{\link{nparcomp}}.
 }
+
 \examples{
+\dontrun{
 data(liver)
 a<-nparcomp(weight ~dosage, data=liver, asy.method = "probit", 
             type = "Williams", alternative = "two.sided", 
             plot.simci = FALSE, info = FALSE)
 summary(a)
-}
+}}
 
 \keyword{print}
 

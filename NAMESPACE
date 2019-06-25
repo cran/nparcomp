@@ -10,3 +10,8 @@ S3method(summary, mctp.rm)
 S3method(summary, nparcomp)
 S3method(summary, nparttest)
 S3method(summary, nparttestpaired)
+  importFrom("graphics", "abline", "axis", "box", "par", "plot",
+             "points", "polygon", "title")
+  importFrom("stats", "aggregate", "cov", "cov2cor", "model.frame",
+             "p.adjust", "pnorm", "pt", "ptukey", "qnorm", "qt",
+             "qtukey", "var")

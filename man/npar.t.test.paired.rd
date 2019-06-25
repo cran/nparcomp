@@ -65,6 +65,7 @@ Make sure that your dataset is ordered by subjects before applying npar.t.test.p
 
 \seealso{ For multiple comparison procedures based on relative effects, see \code{\link{nparcomp}}. }
 \examples{
+\dontrun{
 
 data(PGI)
 a<-npar.t.test.paired(PGIscore~timepoint, data = PGI, 
@@ -72,7 +73,7 @@ a<-npar.t.test.paired(PGIscore~timepoint, data = PGI,
 summary(a)
 plot(a)
                
-}
+}}
 \keyword{ htest }
 
 \concept{ Nonparametric }

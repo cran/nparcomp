@@ -52,12 +52,14 @@ procedure by using the function \code{\link{plot.mctp.rm}}.
 \seealso{
 For further information on the usage of mctp.rm, see \code{\link{mctp.rm}}.
 }
+
 \examples{
+\dontrun{
 data(panic)
 a<-mctp.rm(CGI~week, data=panic, type = "Dunnett",
            alternative = "two.sided",
            asy.method =  "fisher", contrast.matrix = NULL)
 summary(a)
-}
+}}
 
 \keyword{print}

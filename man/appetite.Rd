@@ -25,7 +25,8 @@ fluorouracil, leucovorin, and ocaliplatin), and IROX (irinotecan and oxaliplatin
 Ryu, E. (2009): Simultaneous confidence intervals using ordinal effect measures for ordered categorical outcomes. Statistics In Medicine, 28(25), 3179-3188.
 }
 \examples{
+\dontrun{
 library(nparcomp)
 data(appetite)
-}
+}}
 \keyword{datasets}

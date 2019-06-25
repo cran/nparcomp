@@ -38,7 +38,7 @@ purely nonparametric effects in repeated measures designs. Computational Statist
 and Data Analysis 54 (2010) 1895-1905.
 }
 \author{
-Marius Placzek
+Marius Placzek, Kimihiro Noguchi
 }
 \note{
 It is possible to create a graphical result of the multiple comparison test
@@ -51,11 +51,12 @@ To get a complete result summary of \code{\link{mctp.rm}} the function
 For further information on the usage of mctp.rm, see \code{\link{mctp.rm}}.
 }
 \examples{
+\dontrun{
 data(panic)
 a<-mctp.rm(CGI~week, data=panic, type = "Dunnett",
            alternative = "two.sided",
            asy.method =  "fisher", contrast.matrix = NULL)
 plot(a)
-}
+}}
 
 \keyword{aplot}

@@ -1,3 +1,51 @@
+##' Nonparametric multiple test procedure for many-to-one comparisons
+##' 
+##' This function can be used to perform the nonparametric multiple tests for
+##' many-to-one comparisons by Gao et al. (2008). The multiple level is
+##' strongly controlled by the Hochberg-adjustment.
+##' 
+##' 
+##' @param formula A two-sided 'formula' specifying a numeric response variable
+##' and a factor with more than two levels. If the factor contains less than 3
+##' levels, an error message will be returned.
+##' @param data A dataframe containing the variables specified in formula.
+##' @param alpha The significance level (by default = 0.05).
+##' @param control Character string defining the control group in Dunnett
+##' comparisons. By default it is the first group by lexicographical ordering
+##' @param silent A logical indicating more informations should be print on
+##' screen.
+##' @return
+##' 
+##' \item{Info }{Samples and sizes with estimated relative effects and variance
+##' estimators.} \item{Analysis }{Comparison: Distributions being compared,
+##' Estimator: Estimated effect, df: Degree of Freedom, Statistic:
+##' Teststatistic, P.Raw: Raw p-Value P.Hochberg: Adjusted p-Value by the
+##' Hochberg adjustment, Rejected: A logical indicating rejected hypotheses,
+##' P.Bonf: Bonferroni adjusted p-Values, P.Holm: Holm adjusted p-Value.  }
+##' @note The procedure can only be used to test hypotheses in terms of the
+##' distribution functions.
+##' @author Frank Konietschke
+##' @seealso For nonparametric all-pairs comparison see \code{\link{gao_cs}}.
+##' @references Gao, X. et al. (2008). Nonparametric Multiple Comparison
+##' Procedures for Unbalanced One-Way Factorial Designs. JSPI 138, 2574 - 2591.
+##' 
+##' Konietschke, F., Placzek, M., Schaarschmidt, S., Hothorn, L.A. (2014).
+##' nparcomp: An R Software Package for Nonparametric Multiple Comparisons and
+##' Simultaneous Confidence Intervals. Journal of Statistical Software, 61(10),
+##' 1-17.
+##' @keywords htest
+##' @examples
+##' 
+##' 
+##' data(liver)
+##' 
+##' gao(weight ~dosage, data=liver,alpha=0.05)
+##' 
+##'  # Control= 3
+##' 
+##' gao(weight ~dosage, data=liver,alpha=0.05,control="3")
+##' 
+##' @export gao
 gao <-
 function (formula, data, alpha = 0.05, control = NULL, silent = FALSE)
 {

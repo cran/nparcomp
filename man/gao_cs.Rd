@@ -66,11 +66,11 @@ all results are checked for non-logical relations.
 For nonparametric many-to-one comparison see \code{\link{gao}}.
 }
 \examples{
-
+\dontrun{
 data(reaction)
 
 gao_cs(Time ~Group, data=reaction,alpha=0.05)
-}
+}}
 
 \keyword{htest}
 

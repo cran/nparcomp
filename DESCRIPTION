@@ -1,15 +1,15 @@
 Package: nparcomp
 Type: Package
 Title: Multiple Comparisons and Simultaneous Confidence Intervals
-Version: 2.6
-Date: 2015-03-12
-Author: Frank Konietschke
-Maintainer: Frank Konietschke <fkoniet@gwdg.de>
-Description: With this package, it is possible to compute nonparametric simultaneous confidence intervals for relative contrast effects in the unbalanced one way layout. Moreover, it computes simultaneous p-values. The simultaneous confidence intervals can be computed using multivariate normal distribution, multivariate t-distribution with a Satterthwaite Approximation of the degree of freedom or using multivariate range preserving transformations with Logit or Probit as transformation function. 2 sample comparisons can be performed with the same methods described above. There is no assumption on the underlying distribution function, only that the data have to be at least ordinal numbers.
+Version: 3.0
+Date: 2019-06-24
+Author: Frank Konietschke [aut, cre], Kimihiro Noguchi [ctr], Kerstin Rubarth 
+Maintainer: Kerstin Rubarth <kerstin.rubarth@charite.de>
+Description: With this package, it is possible to compute nonparametric simultaneous confidence intervals for relative contrast effects in the unbalanced one way layout. Moreover, it computes simultaneous p-values. The simultaneous confidence intervals can be computed using multivariate normal distribution, multivariate t-distribution with a Satterthwaite Approximation of the degree of freedom or using multivariate range preserving transformations with Logit or Probit as transformation function. 2 sample comparisons can be performed with the same methods described above. There is no assumption on the underlying distribution function, only that the data have to be at least ordinal numbers. See Konietschke et al. (2015) <doi:10.18637/jss.v064.i09> for details.
 License: GPL
 LazyLoad: yes
 Depends: multcomp, mvtnorm
-Packaged: 2015-03-12 13:24:37 UTC; mplacze
+Packaged: 2019-06-25 10:35:08 UTC; rubarthk
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2015-03-12 17:09:01
+Date/Publication: 2019-06-25 12:00:03 UTC

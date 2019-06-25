@@ -22,7 +22,8 @@ After treatment the relative liver weights of the rats were computed.
 }
 
 \examples{
+\dontrun{
 data(liver)
 boxplot(weight~dosage,data=liver)
-}
+}}
 \keyword{datasets}

@@ -24,7 +24,8 @@ Munzel, U., Brunner, E. (2002). An Exact Paired Rank Test. Biometrical Journal 4
 }
 
 \examples{
+\dontrun{
 data(PGI)
 boxplot(PGIscore~timepoint,data=PGI)
-}
+}}
 \keyword{datasets}

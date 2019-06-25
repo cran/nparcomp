@@ -22,8 +22,9 @@
 }
 
 \examples{
+\dontrun{
 library(nparcomp)
 data(impla)
 boxplot(impla~group,data=impla)
-}
+}}
 \keyword{datasets}

@@ -51,12 +51,14 @@ procedure by using the function \code{\link{plot.mctp}}.
 \seealso{
 For further information on the usage of mctp, see \code{\link{mctp}}.
 }
+
 \examples{
+\dontrun{
 data(liver)
 a<-mctp(weight ~dosage, data=liver, asy.method = "fisher",
         type = "Dunnett", alternative = "two.sided", plot.simci = FALSE, 
         info = FALSE)
 summary(a)
-}
+}}
 
 \keyword{print}

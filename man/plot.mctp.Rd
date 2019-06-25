@@ -37,7 +37,7 @@ F. Konietschke, L.A. Hothorn, E. Brunner: Rank-Based Multiple Test Procedures an
 Simultaneous Confidence Intervals. Electronic Journal of Statistics, Vol.0 (2011) 1-8.
 }
 \author{
-Frank Konietschke
+Frank Konietschke, Kimihiro Noguchi
 }
 \note{
 It is possible to create a graphical result of the multiple comparison test

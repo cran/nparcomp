@@ -73,6 +73,7 @@ A summary and a graph can be created separately by using the functions
 
 \seealso{ For multiple comparison procedures based on relative effects, see \code{\link{nparcomp}}. }
 \examples{
+\dontrun{
 
 data(impla)
 a<-npar.t.test(impla~group, data = impla, method = "t.app",
@@ -83,7 +84,7 @@ b<-npar.t.test(impla~group, data = impla, method= "permu",
                alternative = "two.sided", info=FALSE)
 summary(b)
 plot(b)
-}
+}}
 \keyword{ htest }
 
 \concept{ Nonparametric }
